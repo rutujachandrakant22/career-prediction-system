@@ -126,6 +126,18 @@ history = dl.fit(
 
 dl_loss, dl_acc = dl.evaluate(X_test, y_test, verbose=0)
 
+# -----------------------------
+# 2b. Random Forest Confusion Matrix
+# -----------------------------
+st.subheader("Confusion Matrix - Random Forest")
+cm_rf = confusion_matrix(y_test, rf_pred)
+fig_cm, ax_cm = plt.subplots(figsize=(8,6))
+sns.heatmap(cm_rf, annot=True, fmt="d", cmap="Blues", ax=ax_cm)
+ax_cm.set_title("Confusion Matrix - Random Forest")
+ax_cm.set_xlabel("Predicted")
+ax_cm.set_ylabel("Actual")
+st.pyplot(fig_cm)
+
 
 # -----------------------------
 # 3. Streamlit UI
@@ -158,9 +170,13 @@ input_data = input_data.reindex(columns=X.columns, fill_value=0)
 
 # Prediction using best model
 best_model = rf if rf_acc >= dl_acc else dl
-prediction = best_model.predict(input_data)[0]
-career = le.inverse_transform([prediction])[0]
 
+if best_model is rf:
+    prediction = best_model.predict(input_data)
+else:
+    prediction = np.argmax(best_model.predict(input_data), axis=1)
+
+career = le.inverse_transform(prediction)[0]
 st.success(f"Predicted Career: {career}")
 
 # -----------------------------
